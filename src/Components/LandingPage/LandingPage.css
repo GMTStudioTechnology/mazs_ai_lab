@@ -1,0 +1,6 @@
+/* Custom styles for LandingPage can be added here */
+
+/* Example: Adding a semi-transparent overlay to the hero section if needed */
+.hero-overlay {
+  background-color: rgba(0, 0, 0, 0.5);
+} 
