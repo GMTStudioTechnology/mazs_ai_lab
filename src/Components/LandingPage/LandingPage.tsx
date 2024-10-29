@@ -209,7 +209,7 @@ const LandingPage: React.FC = () => {
           <div className="grid md:grid-cols-4 gap-12">
             <div>
               <Link to="/" className="flex items-center space-x-2 mb-6">
-                <img src="/logo-white.svg" alt="Mazs AI Logo" className="h-8 w-auto" />
+                <img src={logo} alt="Mazs AI Logo" className="h-8 w-auto rounded-full" />
                 <span className="text-white text-xl font-medium">Mazs AI</span>
               </Link>
               <p>Empowering innovation through intelligent solutions.</p>
