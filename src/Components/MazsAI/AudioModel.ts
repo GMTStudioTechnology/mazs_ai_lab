@@ -13,7 +13,7 @@ export async function processVoiceFile(voiceFile: ArrayBuffer): Promise<string> 
       const backgroundSounds = detectBackgroundSounds(channelData, audioBuffer.sampleRate);
       const environmentalSounds = detectEnvironmentalSounds(channelData, audioBuffer.sampleRate);
       const ambientConditions = analyzeAmbientConditions(channelData, audioBuffer.sampleRate);
-      
+       
       const description = generateEnhancedVoiceDescription(
         duration, 
         energy, 
