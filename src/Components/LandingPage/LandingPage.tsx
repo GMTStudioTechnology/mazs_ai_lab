@@ -232,7 +232,7 @@ const LandingPage: React.FC = () => {
               </div>
             ))}
           </div>
-        </div>
+        </div>    
       </section>
 
       {/* Footer */}
