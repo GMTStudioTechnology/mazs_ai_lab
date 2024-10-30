@@ -5,7 +5,7 @@ import logo from '../Assets/GMTStudio.png';
 import mazsai from '../Assets/MazsAI.png';
 const LandingPage: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-
+     
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
