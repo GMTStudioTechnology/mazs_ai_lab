@@ -1,9 +1,9 @@
 /* eslint-disable no-eval */
 /* eslint-disable no-template-curly-in-string */
 import { processImageFile } from './ImageProcessor';
-import { processMediaFile } from './VideoModel';
-import {extractTextFromPDF} from './VideoModel'
-import {extractTextFromDocx} from './VideoModel'
+import { processMediaFile } from '../AI/VideoModel';
+import {extractTextFromPDF} from '../AI/VideoModel'
+import {extractTextFromDocx} from '../AI/VideoModel'
 import {processVoiceFile} from './AudioModel'
 interface Intent {
     patterns: string[];
@@ -2566,7 +2566,7 @@ interface Intent {
       const positiveWords = ['good', 'great', 'excellent', 'amazing', 'wonderful', 'happy', 'joy', 'love', 'like', 'best'];
       const negativeWords = ['bad', 'terrible', 'awful', 'horrible', 'disappointing', 'sad', 'angry', 'hate', 'dislike', 'worst'];
       let score = 0;
-      text.toLowerCase().split(/\s+/).forEach(word => {
+      text.toLowerCase().split(/\s+/).forEach(word => { 
         if (positiveWords.includes(word)) score++;
         if (negativeWords.includes(word)) score--;
       });
@@ -3681,24 +3681,59 @@ interface Intent {
   }
   // Modify the Input function to use the configurable typing speed
   // Modify the handleUserInput function to include puzzle-solving
-  export function handleUserInput(userInput: string, targetLanguage?: string): Promise<string> {
-    console.log("User:", userInput);
-    nlp.updateContext(userInput);
+async function searchDuckDuckGo(query: string): Promise<string> {
+  try {
+    const response = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`);
+    const data = await response.json();
     
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        let response: string;
-        let responseType: 'text' | 'code' = 'text';
-        
+    if (data.Abstract) {
+      return `${data.Abstract}
+${data.AbstractSource}${data.AbstractURL}`;
+    } else if (data.RelatedTopics && data.RelatedTopics.length > 0) {
+      const topResults = data.RelatedTopics.slice(0, 3)
+        .map((topic: any) => topic.Text)
+        .filter(Boolean)
+        .join('\n\n');
+      
+      return `
+
+${topResults}`;
+    } else {
+      return "I couldn't find any relevant information from internet.";
+    }
+  } catch (error) {
+    console.error('internet search error:', error);
+    return "I encountered an error while searching internet.";
+  }
+}
+
+export function handleUserInput(userInput: string, targetLanguage?: string): Promise<string> {
+  console.log("User:", userInput);
+  nlp.updateContext(userInput);
+  
+  return new Promise(async (resolve) => {
+    setTimeout(async () => {
+      let response: string;
+      let responseType: 'text' | 'code' = 'text';
+      
+      try {
+        // Check for search-related queries first
+        if (/search|find|who (is|are|was|were)|where (is|are|was|were)|what is|tell me about|please help me find/i.test(userInput)) {
+          const searchResult = await searchDuckDuckGo(userInput);
+          // Limit response length to 500 characters
+          response = searchResult.length > 500 ? 
+            searchResult.substring(0, 497) + '...' : 
+            searchResult;
+          resolve(JSON.stringify({ text: response, type: 'text' }));
+          return;
+        }
+
         if (isCodeGenerationRequest(userInput)) {
-          // Generate code
           response = generateCode(userInput);
           responseType = 'code';
         } else if (/please summarize this/i.test(userInput)) {
-          // Enhanced text summarization logic
           const textToSummarize = userInput.replace(/please summarize this/i, '').trim();
           response = enhancedSummarizeText(textToSummarize);
-          
         } else if(/please continue this sentence/i.test(userInput)) {
           const partialSentence = userInput.replace(/please continue this sentence/i, '').trim();
           response = continueSentence(partialSentence);
@@ -3708,26 +3743,59 @@ interface Intent {
           response = generateApologyResponse(userInput.slice(4).trim());
         } else if (/[+\-*/%^]/.test(userInput)) {
           response = generateComplexMathCalculation(userInput);
-        } else if (isPuzzle(userInput)) {
+        } else {
+          // First try to get a response from the chatbot
+          response = processChatbotQuery(userInput);
+          
+          // If the response indicates uncertainty, try DuckDuckGo search
+          if (response.includes("I'm not sure") || 
+              response.includes("I don't understand") || 
+              response.includes("I couldn't process") ||
+              response.includes("I don't know")) {
+            const searchResult = await searchDuckDuckGo(userInput);
+            // Limit search result length
+            const limitedResult = searchResult.length > 300 ?
+              searchResult.substring(0, 297) + '...' :
+              searchResult;
+            response = `I'm not entirely sure about this, but let me search for information: ${limitedResult}\nPlease note that this information is not always accurate, but it is the best I can do.`;
+          }
+        }
+
+        // After getting initial response, check for special cases
+        if (isPuzzle(userInput)) {
           response = solvePuzzle(userInput);
         } else if (isMorseCode(userInput)) {
           response = processMorseCode(userInput);
         } else if (/finish this sentence\s*:/i.test(userInput)) {
           const partialSentence = userInput.split(/:\s*/)[1].trim();
           response = continueSentence(partialSentence);
-        } else {
-          response = processChatbotQuery(userInput);
         }
         
         if (targetLanguage) {
           response = nlp.translateText(response, targetLanguage);
         }
+
+        // Ensure final response doesn't exceed 1000 characters
+        if (response.length > 1000) {
+          response = response.substring(0, 997) + '...';
+        }
         
-        // Attach the response type
         resolve(JSON.stringify({ text: response, type: responseType }));
-      }, 100);
-    });
-  }
+      } catch (error) {
+        console.error('Error processing user input:', error);
+        const searchResult = await searchDuckDuckGo(userInput);
+        // Limit error response length
+        const limitedSearchResult = searchResult.length > 300 ?
+          searchResult.substring(0, 297) + '...' :
+          searchResult;
+        resolve(JSON.stringify({
+          text: `I encountered an error processing your request, but I found this information that might help:\n\n${limitedSearchResult}`,
+          type: 'text'
+        }));
+      }
+    }, 100);
+  });
+}
   
   function continueSentence(partialSentence: string): string {
     if (!partialSentence || partialSentence.trim().length === 0) {
@@ -4194,7 +4262,7 @@ interface Intent {
   
   export function getConversationSuggestions(): string[] {
     return [
-      "what is 2 ** 10",
+      "2 ** 10",
       "please continue this sentence : ",
       "please summarize this sentence : ",
       "write a python code"
