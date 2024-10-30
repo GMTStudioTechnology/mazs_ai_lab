@@ -1,9 +1,9 @@
 /* eslint-disable no-eval */
 /* eslint-disable no-template-curly-in-string */
 import { processImageFile } from './ImageProcessor';
-import { processMediaFile } from '../AI/VideoModel';
-import {extractTextFromPDF} from '../AI/VideoModel'
-import {extractTextFromDocx} from '../AI/VideoModel'
+import { processMediaFile } from '../MazsAI/VideoModel';
+import {extractTextFromPDF} from '../MazsAI/VideoModel'
+import {extractTextFromDocx} from '../MazsAI/VideoModel'
 import {processVoiceFile} from './AudioModel'
 interface Intent {
     patterns: string[];
