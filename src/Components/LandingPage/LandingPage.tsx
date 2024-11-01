@@ -22,65 +22,122 @@ const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-black flex flex-col">
-      {/* Header */}
-      <header className={`fixed w-full z-50 transition-all duration-500 backdrop-blur-lg ${isScrolled ? 'bg-black/80' : 'bg-transparent'}`}>
+      {/* Header - Enhanced with better transitions and hover effects */}
+      <header className={`fixed w-full z-50 transition-all duration-500 backdrop-blur-lg ${
+        isScrolled ? 'bg-black/80 shadow-lg shadow-indigo-500/10' : 'bg-transparent'
+      }`}>
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <Link to="/" className="flex items-center space-x-2">
-            <img src={logo} alt="Mazs AI Logo" className="h-8 w-auto rounded-full" />
-            <h1 className="text-2xl font-medium text-white">GMTStudio</h1>
+          <Link to="/" className="flex items-center space-x-2 group">
+            <img 
+              src={logo} 
+              alt="Mazs AI Logo" 
+              className="h-8 w-auto rounded-full transform transition-transform group-hover:scale-110" 
+            />
+            <h1 className="text-2xl font-medium text-white group-hover:text-indigo-400 transition-colors">
+              GMTStudio
+            </h1>
           </Link>
+          
+          {/* Enhanced navigation with better hover effects */}
           <nav>
             <ul className="hidden md:flex space-x-8">
-              <li><a href="#features" className="text-white/90 hover:text-white text-sm font-medium transition">Features</a></li>
-              <li><a href="#about" className="text-white/90 hover:text-white text-sm font-medium transition">About</a></li>
-              <li><a href="#contact" className="text-white/90 hover:text-white text-sm font-medium transition">Contact</a></li>
+              {['Features', 'About', 'Contact'].map((item) => (
+                <li key={item}>
+                  <a 
+                    href={`#${item.toLowerCase()}`} 
+                    className="text-white/90 hover:text-white text-sm font-medium transition-all relative group"
+                  >
+                    {item}
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-500 transition-all group-hover:w-full" />
+                  </a>
+                </li>
+              ))}
               <li>
-                <Link to="/MazsAI" className="px-5 py-2 bg-white text-black rounded-full text-sm font-medium hover:bg-white/90 transition">
+                <Link 
+                  to="/MazsAI" 
+                  className="px-5 py-2 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white rounded-full text-sm font-medium 
+                    hover:from-indigo-500 hover:to-indigo-400 transition-all duration-300 shadow-lg shadow-indigo-500/25
+                    hover:shadow-indigo-500/40 transform hover:-translate-y-0.5"
+                >
                   Try Now
                 </Link>
               </li>
             </ul>
+            
+            {/* Enhanced mobile menu button */}
             <button 
               className="md:hidden text-white focus:outline-none" 
-              onClick={toggleMenu} 
+              onClick={toggleMenu}
               aria-label="Toggle navigation menu"
               aria-expanded={isMenuOpen}
             >
-              {isMenuOpen ? (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              ) : (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              )}
+              <div className="relative w-6 h-6">
+                <span className={`absolute left-0 top-1/2 w-6 h-0.5 bg-white transform transition-all duration-300 
+                  ${isMenuOpen ? 'rotate-45 translate-y-0' : '-translate-y-1'}`} />
+                <span className={`absolute left-0 top-1/2 w-6 h-0.5 bg-white transition-opacity duration-300 
+                  ${isMenuOpen ? 'opacity-0' : 'opacity-100'}`} />
+                <span className={`absolute left-0 top-1/2 w-6 h-0.5 bg-white transform transition-all duration-300 
+                  ${isMenuOpen ? '-rotate-45 translate-y-0' : 'translate-y-1'}`} />
+              </div>
             </button>
           </nav>
         </div>
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden bg-black/80 backdrop-blur-lg">
-            <ul className="flex flex-col space-y-4 px-6 py-4">
-              <li><a href="#features" className="text-white/90 hover:text-white text-sm font-medium transition">Features</a></li>
-              <li><a href="#about" className="text-white/90 hover:text-white text-sm font-medium transition">About</a></li>
-              <li><a href="#contact" className="text-white/90 hover:text-white text-sm font-medium transition">Contact</a></li>
+
+        {/* Enhanced mobile menu with smooth transitions */}
+        <div className={`md:hidden transform transition-all duration-300 ${
+          isMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+        }`}>
+          <div className="bg-black/95 backdrop-blur-xl border-t border-white/10">
+            <ul className="flex flex-col space-y-4 px-6 py-8">
+              {['Features', 'About', 'Contact'].map((item) => (
+                <li key={item}>
+                  <a 
+                    href={`#${item.toLowerCase()}`} 
+                    className="block text-white/90 hover:text-white text-lg font-medium transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {item}
+                  </a>
+                </li>
+              ))}
               <li>
-                <Link to="/MazsAI" className="block text-center px-5 py-2 bg-white text-black rounded-full text-sm font-medium hover:bg-white/90 transition">
+                <Link 
+                  to="/MazsAI" 
+                  className="block text-center px-5 py-3 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white 
+                    rounded-full text-lg font-medium hover:from-indigo-500 hover:to-indigo-400 transition-all 
+                    shadow-lg shadow-indigo-500/25"
+                  onClick={() => setIsMenuOpen(false)}
+                >
                   Try Now
                 </Link>
               </li>
             </ul>
           </div>
-        )}
+        </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center bg-black pt-20 md:pt-0">
-        <div className="absolute inset-0 bg-gradient-radial from-indigo-500/20 via-transparent to-transparent" />
+      {/* Hero Section - Enhanced with better animations and gradients */}
+      <section className="relative min-h-screen flex items-center justify-center bg-black pt-20 md:pt-0 overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-radial from-indigo-500/20 via-transparent to-transparent animate-pulse" />
+          <div 
+            className="absolute inset-0 opacity-[0.1]"
+            style={{
+              backgroundImage: `
+                linear-gradient(to right, white 1px, transparent 1px),
+                linear-gradient(to bottom, white 1px, transparent 1px)
+              `,
+              backgroundSize: '40px 40px'
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-radial from-transparent via-black/50 to-black" />
+        </div>
+        
         <div className="relative text-center text-white px-4 max-w-5xl mx-auto">
-          <h2 className="text-4xl sm:text-6xl md:text-8xl font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-300">
-            Welcome to Mazs AI 
+          <h2 className="text-4xl sm:text-6xl md:text-8xl font-bold mb-8 animate-fade-in">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-300 to-white">
+              Welcome to Mazs AI
+            </span>
           </h2>
           <p className="text-lg sm:text-xl md:text-2xl mb-12 text-white/80 font-light max-w-3xl mx-auto leading-relaxed">
             Made by GMTStudio, for the future.
